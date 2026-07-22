@@ -1,0 +1,4 @@
+helpdesk.db
+reports/
+__pycache__/
+*.pyc
