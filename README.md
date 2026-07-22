@@ -1,151 +1,87 @@
-# IT Helpdesk Ticketing System — SQL + Python Analytics
+# Ticket Tracker (SQL + Python)
 
-Projekt symuluje bazę danych systemu zgłoszeń IT (helpdesk), jakiego używa
-każdy dział IT Support. Zawiera relacyjny model danych w SQL, generator
-realistycznych danych testowych oraz skrypt w Pythonie, który automatycznie
-tworzy raporty CSV i wykresy na podstawie zapytań SQL.
+A portfolio project simulating a real-world IT helpdesk ticketing system built with SQLite and Python.
 
-## Czego dotyczy ten projekt
+The project tracks support tickets submitted by employees, the technicians who resolve them, and the devices assigned to each user. It also includes analytical SQL queries answering common IT support questions, such as technician workload, average resolution time, SLA breaches, and monthly ticket trends. A Python script automates report generation by exporting query results to CSV files and creating charts.
 
-Dział IT Support obsługuje setki zgłoszeń miesięcznie: awarie sprzętu,
-problemy z siecią, resety haseł itd. Ten projekt odpowiada na pytania,
-które realnie zadaje sobie taki zespół:
+## Database structure
 
-- Ile zgłoszeń mamy w każdym statusie?
-- Jak szybko rozwiązujemy zgłoszenia w zależności od priorytetu?
-- Który technik obsługuje najwięcej zgłoszeń?
-- Które zgłoszenia przekraczają SLA (umowny czas reakcji)?
-- Jak zmienia się liczba zgłoszeń w czasie?
+The database consists of five related tables:
 
-## Struktura bazy danych (ERD)
+- **users** – employees who submit support tickets
+- **technicians** – IT staff responsible for resolving tickets
+- **tickets** – the main table containing ticket information
+- **ticket_comments** – ticket history and technician notes
+- **assets** – devices assigned to users (laptops, monitors, etc.)
 
 ```
-users (id, name, department, email)
-        │
-        ├──< tickets (id, user_id, technician_id, subject, category,
-        │             priority, status, created_at, resolved_at)
-        │             │
-        │             └──< ticket_comments (id, ticket_id, author, comment, created_at)
-        │
-        └──< assets (id, user_id, device_type, serial_number, purchase_date)
-
-technicians (id, name, team) ──< tickets
+users --< tickets >-- technicians
+  |           |
+  |           +--< ticket_comments
+  |
+  +--< assets
 ```
 
-## Struktura plików w repozytorium
+## Skills demonstrated
 
-```
-helpdesk-project/
-├── schema.sql          -> definicja tabel i indeksów
-├── seed_data.py         -> generuje dane testowe i tworzy helpdesk.db
-├── queries.sql           -> 10 gotowych zapytan analitycznych z komentarzami
-├── report.py              -> laczy sie z baza, eksportuje CSV + wykresy PNG
-├── reports/                -> (generowane automatycznie) pliki CSV
-│   └── charts/               -> (generowane automatycznie) wykresy PNG
-└── README.md
-```
+- Relational database design
+- SQL JOINs
+- Aggregate functions
+- CASE expressions
+- Window functions (LAG)
+- SQLite
+- Python automation
+- CSV report generation
+- Data visualization with Matplotlib
 
-## Jak uruchomić projekt u siebie — krok po kroku
+## Files
 
-### Krok 0: Sprawdź, czy masz Pythona
-Otwórz terminal (Windows: wpisz w wyszukiwarce "PowerShell" albo "cmd";
-Mac: wpisz w Spotlight "Terminal") i wpisz:
-```
-python3 --version
-```
-Jeśli pokaże np. `Python 3.11.x` — masz Pythona i możesz przejść dalej.
-Jeśli nie — pobierz go z [python.org/downloads](https://www.python.org/downloads/)
-i podczas instalacji **zaznacz checkbox "Add Python to PATH"**.
+- **schema.sql** – database schema and table definitions
+- **seed_data.py** – generates around 450 realistic sample tickets with randomized users, dates, priorities, and statuses
+- **queries.sql** – analytical SQL queries demonstrating JOINs, aggregations, CASE expressions, and window functions
+- **report.py** – executes SQL queries and exports CSV reports and PNG charts
+- **requirements.txt** – project dependencies
+- **.gitignore** – Git configuration
 
-### Krok 1: Pobierz pliki projektu
-Jeśli masz już to repozytorium na GitHubie (patrz sekcja niżej), pobierz je poleceniem:
-```
-git clone https://github.com/TWOJA-NAZWA-UZYTKOWNIKA/helpdesk-project.git
-cd helpdesk-project
-```
-Jeśli pracujesz lokalnie z plikami, które właśnie dostałaś — po prostu wejdź
-do folderu z tymi plikami w terminalu, np.:
-```
-cd Downloads/helpdesk-project
-```
+## Example queries
 
-### Krok 2: Zainstaluj potrzebną bibliotekę (tylko do wykresów)
-```
-pip install matplotlib --break-system-packages
-```
-(Jeśli to polecenie da błąd, spróbuj bez `--break-system-packages`,
-albo `pip3 install matplotlib`)
+- Average resolution time by priority using `julianday()`
+- Technician performance summary based on resolved tickets
+- Month-over-month ticket trend using the `LAG()` window function
+- SLA breach detection based on ticket priority and resolution time
+- Ticket distribution by status and priority
 
-### Krok 3: Wygeneruj bazę danych z przykładowymi zgłoszeniami
-```
+The complete collection of queries is available in `queries.sql`.
+
+## How to run
+
+Requires Python 3.
+
+```bash
+pip install -r requirements.txt
 python3 seed_data.py
-```
-Powinnaś zobaczyć komunikat, że baza `helpdesk.db` została utworzona
-z ok. 450 zgłoszeniami, 60 użytkownikami itd.
-
-### Krok 4: Wygeneruj raporty i wykresy
-```
 python3 report.py
 ```
-To stworzy folder `reports/` z plikami CSV oraz `reports/charts/` z wykresami PNG.
-Możesz je otworzyć zwykłym podglądem zdjęć / Excelem.
 
-### Krok 5 (opcjonalnie): Uruchom pojedyncze zapytania SQL
-Jeśli chcesz "pobawić się" zapytaniami bez Pythona, zainstaluj DB Browser
-for SQLite (darmowy program): [sqlitebrowser.org](https://sqlitebrowser.org/)
-1. Otwórz program → "Open Database" → wybierz plik `helpdesk.db`
-2. Przejdź do zakładki "Execute SQL"
-3. Wklej dowolne zapytanie z pliku `queries.sql` i kliknij "Execute" (▶)
+Running the scripts will:
 
-## Jak wrzucić ten projekt na GitHub (żeby rekruter mógł go zobaczyć)
+- generate the SQLite database (`helpdesk.db`)
+- populate it with sample data
+- create CSV reports
+- generate charts in the `reports/` directory
 
-1. Załóż konto na [github.com](https://github.com), jeśli jeszcze nie masz.
-2. Kliknij zielony przycisk **"New"** (lub "+" w prawym górnym rogu → "New repository").
-3. Nazwa repozytorium: `helpdesk-ticketing-sql` (albo dowolna sensowna nazwa).
-4. Ustaw jako **Public** (żeby rekruter mógł zobaczyć bez logowania).
-5. NIE zaznaczaj "Add README" (Ty już masz swój plik README.md).
-6. Kliknij "Create repository".
-7. Na następnej stronie GitHub pokaże Ci komendy do wklejenia w terminalu.
-   W folderze z projektem wpisz kolejno:
-```
-git init
-git add .
-git commit -m "Pierwsza wersja: helpdesk ticketing system SQL + Python"
-git branch -M main
-git remote add origin https://github.com/TWOJA-NAZWA-UZYTKOWNIKA/helpdesk-ticketing-sql.git
-git push -u origin main
-```
-8. Odśwież stronę repozytorium na GitHubie — wszystkie pliki powinny się pojawić.
+To explore the database manually, open `helpdesk.db` with DB Browser for SQLite and execute any query from `queries.sql`.
 
-**Ważne:** plik `helpdesk.db` i folder `reports/` to dane wygenerowane —
-nie musisz ich wrzucać na GitHub (można je łatwo odtworzyć poleceniem
-`python3 seed_data.py && python3 report.py`). Możesz dodać plik `.gitignore`
-z zawartością:
-```
-helpdesk.db
-reports/
-```
-żeby git ich nie śledził. Zamiast tego wrzuć 1-2 przykładowe wykresy PNG
-do repo (np. do folderu `screenshots/`), żeby rekruter widział efekt
-bez klonowania i uruchamiania projektu.
+## Sample output
 
-## Co warto dodać do opisu repozytorium na GitHubie
+![Tickets by status](screenshots/tickets_by_status.png)
 
-W polu "About" repozytorium (ikonka zębatki obok "About" po prawej stronie)
-wpisz krótki opis, np.:
-> SQL + Python project simulating an IT helpdesk ticketing system — schema design, analytical queries (JOINs, window functions, CASE), and automated CSV/chart reporting.
+![Monthly trend](screenshots/monthly_trend.png)
 
-Dodaj też tagi (topics): `sql`, `sqlite`, `python`, `data-analysis`, `it-support`
+## Possible extensions
 
-## Możliwe rozszerzenia (jeśli chcesz pójść dalej)
-
-- Przenieś bazę z SQLite do PostgreSQL, żeby pokazać pracę z "prawdziwym" serwerem bazodanowym
-- Dodaj prosty dashboard w Streamlit (`pip install streamlit`) zamiast plików PNG
-- Dodaj testy sprawdzające poprawność danych (np. czy `resolved_at` zawsze jest po `created_at`)
-- Połącz z Twoim istniejącym projektem **Linux Log Parser** — logi mogą trafiać
-  jako nowe rekordy do tabeli `tickets` zamiast tylko do konsoli
-
-## Autor
-
-Wiktoria Kania — projekt stworzony jako część przygotowań do rekrutacji na
-stanowisko IT Support / Infrastructure Intern.
+- Migrate the database from SQLite to PostgreSQL
+- Add data validation tests (for example, ensuring `resolved_at` is never earlier than `created_at`)
+- Build a simple dashboard using Flask
+- Optimize query performance with indexes
+- Connect the project with a log parser so real log events can automatically generate support tickets
