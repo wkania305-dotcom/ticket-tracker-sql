@@ -72,11 +72,7 @@ Running the scripts will:
 
 To explore the database manually, open `helpdesk.db` with DB Browser for SQLite and execute any query from `queries.sql`.
 
-## Sample output
 
-![Tickets by status](screenshots/tickets_by_status.png)
-
-![Monthly trend](screenshots/monthly_trend.png)
 
 ## Possible extensions
 
